@@ -415,7 +415,15 @@ export default {
           title: "提示",
           message:
             "文件为网易云音乐加密文件，此类文件的逆向算法随时可能因为网易云音乐的更新而失效，尽量避免上传ncm格式文件",
-          duration: 20000,
+          duration: 10000,
+        });
+      }
+      if (type === "ogg") {
+        this.$notify.error({
+          title: "警告",
+          message:
+            "文件为ogg类型音频文件，此类文件在ios上播放异常，极度不建议上传ogg格式音乐文件！建议转换格式后上传！",
+          duration: 60000,
         });
       }
       this.musicFile = file;

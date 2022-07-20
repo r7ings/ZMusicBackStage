@@ -535,6 +535,10 @@ export default {
           },
         },
       ],
+      data_playRecordView: {
+        data_type: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        data_value: [9, 2, 12, 7, 22, 12, 9],
+      },
       serverData: undefined,
     };
   },
@@ -868,7 +872,7 @@ export default {
                 color: "#02a6b5",
               },
             },
-            data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            data: this.data_playRecordView.data_type,
           },
           yAxis: {
             type: "value",
@@ -883,7 +887,7 @@ export default {
           },
           series: [
             {
-              data: [150, 230, 224, 218, 135, 147, 260],
+              data: this.data_playRecordView.data_value,
               type: "line",
             },
           ],
@@ -893,6 +897,33 @@ export default {
   },
   components: { ScrollLoginInfo },
   beforeMount() {
+    //获取平台热播前五
+    apis.api.get("/backStage/MainDetail/getTopFive").then((res) => {
+      console.log(res.data);
+      this.data_playCountView = res.data.playCount;
+      var playCountChart = echarts.init(
+        document.getElementById("playCountView")
+      );
+      playCountChart.setOption(this.option_playCount);
+    });
+    //获取日播放
+    apis.api.get("/backStage/MainDetail/getDailyPlay").then((res) => {
+      // console.log(res.data);
+      var playRecordView = {
+        data_type: [],
+        data_value: [],
+      };
+      res.data.playRecord.forEach((item) => {
+        playRecordView.data_type.push(item.date);
+        playRecordView.data_value.push(item.detail.length);
+      });
+      // console.log(playRecordView);
+      this.data_playRecordView = playRecordView;
+      var playRecordView = echarts.init(
+        document.getElementById("playTotalView")
+      );
+      playRecordView.setOption(this.option_playTotal);
+    });
     //获取腾讯云服务器实例硬件实时指标
     this.getTencentData = () => {
       this.cpuIndex = 0;
@@ -900,7 +931,6 @@ export default {
       apis.api
         .get("backStage/MainDetail/getTencentData")
         .then((res) => {
-          // console.log(res.data);
           res.data.data.cpuData.reverse();
           res.data.data.memoryData.reverse();
           this.serverData = res.data.data;
@@ -914,6 +944,7 @@ export default {
     this.getTencentData();
     //获取日登录
     apis.api.get("backStage/MainDetail/getDailyLogin").then((res) => {
+      // console.log(res);
       var loginView = {
         data_type: [],
         data_value: [],
@@ -1010,15 +1041,11 @@ export default {
       }, 1000);
     };
     var mapChart = echarts.init(document.getElementById("map"));
-    var playCountChart = echarts.init(document.getElementById("playCountView"));
     var delayChart = echarts.init(document.getElementById("delayView"));
-    var playTotalChart = echarts.init(document.getElementById("playTotalView"));
 
     // echarts.registerMap("china", { geoJSON: china });
     mapChart.setOption(this.option_map);
-    playCountChart.setOption(this.option_playCount);
     delayChart.setOption(this.option_delay);
-    playTotalChart.setOption(this.option_playTotal);
   },
 };
 </script>
